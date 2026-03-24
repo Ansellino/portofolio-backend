@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ───
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  FREELANCE
+  INTERNSHIP
+  CONTRACT
+}
+
+// ─── ADMIN ───
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  password     String
+  name         String
+  refreshToken String?  @map("refresh_token")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  @@map("admin")
+}
+
+// ─── PROFILE (single record) ───
+model Profile {
+  id          String   @id @default(uuid())
+  fullName    String   @map("full_name")
+  headline    String
+  bio         String
+  avatarUrl   String?  @map("avatar_url")
+  resumeUrl   String?  @map("resume_url")
+  email       String
+  phone       String?
+  location    String?
+  githubUrl   String?  @map("github_url")
+  linkedinUrl String?  @map("linkedin_url")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  @@map("profile")
+}
+
+// ─── PROJECTS ───
+model Project {
+  id           String   @id @default(uuid())
+  title        String
+  slug         String   @unique
+  description  String
+  content      String?
+  thumbnailUrl String?  @map("thumbnail_url")
+  liveUrl      String?  @map("live_url")
+  githubUrl    String?  @map("github_url")
+  startDate    DateTime @map("start_date")
+  endDate      DateTime? @map("end_date")
+  isFeatured   Boolean  @default(false) @map("is_featured")
+  sortOrder    Int      @default(0) @map("sort_order")
+  isPublished  Boolean  @default(true) @map("is_published")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  skills       ProjectSkill[]
+  @@map("projects")
+}
+
+// ─── WORK EXPERIENCES ───
+model WorkExperience {
+  id              String         @id @default(uuid())
+  company         String
+  position        String
+  description     String?
+  responsibilities String[]
+  companyLogoUrl  String?        @map("company_logo_url")
+  startDate       DateTime       @map("start_date")
+  endDate         DateTime?      @map("end_date")
+  location        String?
+  employmentType  EmploymentType @map("employment_type")
+  sortOrder       Int            @default(0) @map("sort_order")
+  isPublished     Boolean        @default(true) @map("is_published")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  @@map("work_experiences")
+}
+
+// ─── CERTIFICATIONS ───
+model Certification {
+  id            String    @id @default(uuid())
+  name          String
+  issuer        String
+  credentialUrl String?   @map("credential_url")
+  credentialId  String?   @map("credential_id")
+  imageUrl      String?   @map("image_url")
+  issueDate     DateTime  @map("issue_date")
+  expiryDate    DateTime? @map("expiry_date")
+  category      String?
+  sortOrder     Int       @default(0) @map("sort_order")
+  isPublished   Boolean   @default(true) @map("is_published")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  @@map("certifications")
+}
+
+// ─── EDUCATION ───
+model Education {
+  id           String    @id @default(uuid())
+  institution  String
+  degree       String
+  fieldOfStudy String    @map("field_of_study")
+  gpa          Decimal?  @db.Decimal(3, 2)
+  description  String?
+  startDate    DateTime  @map("start_date")
+  endDate      DateTime? @map("end_date")
+  sortOrder    Int       @default(0) @map("sort_order")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  @@map("education")
+}
+
+// ─── SKILLS ───
+model Skill {
+  id        String         @id @default(uuid())
+  name      String         @unique
+  category  String
+  iconUrl   String?        @map("icon_url")
+  sortOrder Int            @default(0) @map("sort_order")
+  projects  ProjectSkill[]
+  posts     PostTag[]
+  @@map("skills")
+}
+
+// ─── BLOG POSTS ───
+model BlogPost {
+  id             String    @id @default(uuid())
+  title          String
+  slug           String    @unique
+  excerpt        String
+  content        String
+  coverImageUrl  String?   @map("cover_image_url")
+  category       String
+  readingTimeMin Int       @map("reading_time_min")
+  isPublished    Boolean   @default(false) @map("is_published")
+  publishedAt    DateTime? @map("published_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  tags           PostTag[]
+  @@map("blog_posts")
+}
+
+// ─── CONTACT MESSAGES ───
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  @@map("contact_messages")
+}
+
+// ─── JUNCTION: Project <-> Skill ───
+model ProjectSkill {
+  projectId String  @map("project_id")
+  skillId   String  @map("skill_id")
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  skill     Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  @@id([projectId, skillId])
+  @@map("project_skills")
+}
+
+// ─── JUNCTION: BlogPost <-> Skill (tags) ───
+model PostTag {
+  postId  String   @map("post_id")
+  skillId String   @map("skill_id")
+  post    BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  skill   Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  @@id([postId, skillId])
+  @@map("post_tags")
+}
