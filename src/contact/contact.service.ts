@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { paginateResponse } from '../common/utils/paginate';
@@ -12,6 +8,7 @@ import nodemailer, { Transporter } from 'nodemailer';
 @Injectable()
 export class ContactService {
   private readonly transporter: Transporter;
+  private readonly logger = new Logger(ContactService.name);
 
   constructor(
     private readonly prisma: PrismaService,
@@ -37,24 +34,26 @@ export class ContactService {
     const fromEmail = this.config.get<string>('SMTP_FROM');
 
     if (!notifyEmail || !fromEmail) {
-      throw new InternalServerErrorException(
-        'ADMIN_NOTIFY_EMAIL and SMTP_FROM must be configured',
+      this.logger.warn(
+        'ADMIN_NOTIFY_EMAIL/SMTP_FROM is not configured. Skipping email notification.',
       );
+      return created;
     }
 
-    await this.transporter.sendMail({
-      to: notifyEmail,
-      from: fromEmail,
-      subject: `[Contact] ${dto.subject}`,
-      replyTo: dto.email,
-      text: [
-        `Name: ${dto.name}`,
-        `Email: ${dto.email}`,
-        `Subject: ${dto.subject}`,
-        '',
-        dto.message,
-      ].join('\n'),
-      html: `
+    void this.transporter
+      .sendMail({
+        to: notifyEmail,
+        from: fromEmail,
+        subject: `[Contact] ${dto.subject}`,
+        replyTo: dto.email,
+        text: [
+          `Name: ${dto.name}`,
+          `Email: ${dto.email}`,
+          `Subject: ${dto.subject}`,
+          '',
+          dto.message,
+        ].join('\n'),
+        html: `
         <h2>New Contact Message</h2>
         <p><strong>Name:</strong> ${dto.name}</p>
         <p><strong>Email:</strong> ${dto.email}</p>
@@ -62,7 +61,10 @@ export class ContactService {
         <p><strong>Message:</strong></p>
         <p>${dto.message.replace(/\n/g, '<br/>')}</p>
       `,
-    });
+      })
+      .catch((err) => {
+        this.logger.error('Failed to send contact notification email', err);
+      });
 
     return created;
   }
