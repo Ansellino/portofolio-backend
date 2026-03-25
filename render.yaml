@@ -7,7 +7,7 @@ services:
     autoDeploy: true
     healthCheckPath: /api/v1
     buildCommand: npm ci && npm run prisma:generate && npm run build
-    startCommand: npm run prisma:migrate:deploy && npm run start:prod
+    startCommand: sh -c 'if [ -d prisma/migrations ] && [ "$(ls -A prisma/migrations)" ]; then npm run prisma:migrate:deploy; else echo "No Prisma migrations found, skipping migrate deploy"; fi && npm run start:prod'
     envVars:
       - key: NODE_ENV
         value: production
