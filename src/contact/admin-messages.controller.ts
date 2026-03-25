@@ -17,8 +17,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { ContactService } from './contact.service';
+import { ListMessagesQueryDto } from './dto/list-messages-query.dto';
 
 @ApiTags('admin-messages')
 @ApiBearerAuth()
@@ -31,6 +31,7 @@ export class AdminMessagesController {
   @ApiOperation({ summary: 'Get all contact messages' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'isRead', required: false, enum: ['true', 'false'] })
   @ApiResponse({
     status: 200,
     description: 'Messages retrieved',
@@ -58,8 +59,13 @@ export class AdminMessagesController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  findAll(@Query() pagination: PaginationDto) {
-    return this.contactService.listAll(pagination.page, pagination.limit);
+  findAll(@Query() query: ListMessagesQueryDto) {
+    const isRead =
+      query.isRead === undefined
+        ? undefined
+        : query.isRead.toLowerCase() === 'true';
+
+    return this.contactService.listAll(query.page, query.limit, isRead);
   }
 
   @Patch(':id/read')

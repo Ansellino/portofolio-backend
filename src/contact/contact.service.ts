@@ -67,18 +67,21 @@ export class ContactService {
     return created;
   }
 
-  async listAll(page = 1, limit = 10) {
+  async listAll(page = 1, limit = 10, isRead?: boolean) {
     const safePage = Number.isFinite(page) && page > 0 ? page : 1;
     const safeLimit =
       Number.isFinite(limit) && limit > 0 ? Math.min(limit, 50) : 10;
 
+    const where = isRead === undefined ? undefined : { isRead };
+
     const [items, total] = await Promise.all([
       this.prisma.contactMessage.findMany({
+        where,
         orderBy: [{ createdAt: 'desc' }],
         skip: (safePage - 1) * safeLimit,
         take: safeLimit,
       }),
-      this.prisma.contactMessage.count(),
+      this.prisma.contactMessage.count({ where }),
     ]);
 
     return paginateResponse(items, total, safePage, safeLimit);
