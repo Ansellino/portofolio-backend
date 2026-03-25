@@ -70,3 +70,4 @@ docker-compose.override.yml
 
 /generated/prisma
 DEPLOY_RENDER.md
+mocks/
