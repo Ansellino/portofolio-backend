@@ -1,5 +1,6 @@
 import { EmploymentType } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -11,6 +12,25 @@ import {
   IsUrl,
   Min,
 } from 'class-validator';
+
+function normalizeResponsibilities(value: unknown): unknown {
+  if (value === undefined) return undefined;
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === 'string' ? item.trim() : ''))
+      .filter((item) => item.length > 0);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(/\r?\n|;/)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+
+  return value;
+}
 
 export class CreateExperienceDto {
   @ApiProperty({ example: 'Tech Corp' })
@@ -30,6 +50,7 @@ export class CreateExperienceDto {
     type: [String],
     example: ['Developed REST APIs', 'Optimized PostgreSQL queries'],
   })
+  @Transform(({ value }) => normalizeResponsibilities(value))
   @IsArray()
   @IsString({ each: true })
   responsibilities: string[];
