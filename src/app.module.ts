@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import AuthModule from './auth/auth.module';
 import { ProjectsModule } from './projects/projects.module';
 import { ExperiencesModule } from './experiences/experiences.module';
@@ -15,6 +17,8 @@ import { ContactModule } from './contact/contact.module';
 import { ResumeModule } from './resume/resume.module';
 
 @Module({
+  controllers: [AppController],
+  providers: [AppService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,

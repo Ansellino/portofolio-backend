@@ -44,6 +44,20 @@ export class AuthService {
     return this.login(admin);
   }
 
+  async refreshTokensByToken(rt: string) {
+    let payload: { sub: string; email: string };
+
+    try {
+      payload = this.jwt.verify(rt, {
+        secret: this.config.get('JWT_REFRESH_SECRET'),
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    return this.refreshTokens(payload.sub, rt);
+  }
+
   async logout(userId: string) {
     await this.prisma.admin.update({
       where: { id: userId },

@@ -53,7 +53,6 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiHeader({ name: 'x-refresh-token', required: true })
   @ApiResponse({
@@ -67,16 +66,12 @@ export class AuthController {
     },
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseGuards(JwtAuthGuard)
-  async refresh(
-    @Req() req: AuthenticatedRequest,
-    @Headers('x-refresh-token') refreshToken?: string,
-  ) {
+  async refresh(@Headers('x-refresh-token') refreshToken?: string) {
     if (!refreshToken) {
       throw new UnauthorizedException('Missing refresh token');
     }
 
-    return this.authService.refreshTokens(req.user.id, refreshToken);
+    return this.authService.refreshTokensByToken(refreshToken);
   }
 
   @Post('logout')

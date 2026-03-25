@@ -8,9 +8,28 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const normalizeOrigin = (value: string) => value.trim().replace(/\/$/, '');
+  const corsOriginRaw = process.env.CORS_ORIGIN || 'http://localhost:5173';
+  const corsOrigins = corsOriginRaw
+    .split(',')
+    .map((item) => normalizeOrigin(item))
+    .filter(Boolean);
+
   app.use(helmet());
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
+      // Allow non-browser clients (no Origin header), and configured web origins.
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const incoming = normalizeOrigin(origin);
+      callback(null, corsOrigins.includes(incoming));
+    },
     credentials: true,
   });
 

@@ -6,8 +6,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { PaginationDto } from '../common/dto/pagination.dto';
 import { BlogService } from './blog.service';
+import { ListBlogQueryDto } from './dto/list-blog-query.dto';
 
 @ApiTags('blog')
 @Controller('blog')
@@ -18,6 +18,7 @@ export class BlogController {
   @ApiOperation({ summary: 'Get all published blog posts' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'isPublished', required: false })
   @ApiQuery({ name: 'category', required: false })
   @ApiResponse({
     status: 200,
@@ -44,14 +45,11 @@ export class BlogController {
       },
     },
   })
-  findPublished(
-    @Query() pagination: PaginationDto,
-    @Query('category') category?: string,
-  ) {
+  findPublished(@Query() query: ListBlogQueryDto) {
     return this.blogService.findPublished(
-      pagination.page,
-      pagination.limit,
-      category,
+      query.page,
+      query.limit,
+      query.category,
     );
   }
 
