@@ -1,4 +1,5 @@
 import { EmploymentType } from '@prisma/client';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
@@ -12,43 +13,57 @@ import {
 } from 'class-validator';
 
 export class CreateExperienceDto {
+  @ApiProperty({ example: 'Tech Corp' })
   @IsString()
   company: string;
 
+  @ApiProperty({ example: 'Backend Engineer' })
   @IsString()
   position: string;
 
+  @ApiPropertyOptional({ example: 'Built and maintained scalable APIs.' })
   @IsOptional()
   @IsString()
   description?: string;
 
+  @ApiProperty({
+    type: [String],
+    example: ['Developed REST APIs', 'Optimized PostgreSQL queries'],
+  })
   @IsArray()
   @IsString({ each: true })
   responsibilities: string[];
 
+  @ApiPropertyOptional({ example: 'https://cdn.example.com/logos/tech-corp.png' })
   @IsOptional()
   @IsUrl()
   companyLogoUrl?: string;
 
+  @ApiProperty({ example: '2022-01-01' })
   @IsDateString()
   startDate: string;
 
+  @ApiPropertyOptional({ example: '2024-01-01' })
   @IsOptional()
   @IsDateString()
   endDate?: string;
 
+  @ApiPropertyOptional({ example: 'Jakarta, Indonesia' })
   @IsOptional()
   @IsString()
   location?: string;
 
+  @ApiProperty({ enum: EmploymentType, example: EmploymentType.FULL_TIME })
   @IsEnum(EmploymentType)
   employmentType: EmploymentType;
 
+  @ApiPropertyOptional({ example: 1, minimum: 0 })
   @IsOptional()
   @IsInt()
   @Min(0)
   sortOrder?: number;
 
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
   isPublished?: boolean;

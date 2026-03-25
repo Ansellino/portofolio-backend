@@ -16,6 +16,9 @@ if (!prismaUrl) {
 
 export default defineConfig({
   schema: path.join(__dirname, 'prisma', 'schema.prisma'),
+  migrations: {
+    seed: 'ts-node prisma/seed.ts',
+  },
   datasource: {
     url: prismaUrl,
   },
