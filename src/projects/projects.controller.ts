@@ -72,6 +72,18 @@ export class ProjectsController {
     return this.projectsService.findAll();
   }
 
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get project by slug' })
+  @ApiParam({ name: 'slug', description: 'Project slug' })
+  @ApiResponse({
+    status: 200,
+    description: 'Project retrieved',
+  })
+  @ApiResponse({ status: 404, description: 'Project not found' })
+  findOneBySlug(@Param('slug') slug: string) {
+    return this.projectsService.findOneBySlug(slug);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get project by id' })
   @ApiParam({ name: 'id', description: 'Project id (UUID)' })

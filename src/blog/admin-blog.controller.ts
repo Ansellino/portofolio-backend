@@ -82,6 +82,16 @@ export class AdminBlogController {
     return this.blogService.create(dto);
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Get blog post by id for admin' })
+  @ApiParam({ name: 'id', description: 'Blog post id (UUID)' })
+  @ApiResponse({ status: 200, description: 'Blog post retrieved' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Blog post not found' })
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.blogService.findById(id);
+  }
+
   @Patch(':id')
   @ApiOperation({ summary: 'Update blog post by id' })
   @ApiParam({ name: 'id', description: 'Blog post id (UUID)' })

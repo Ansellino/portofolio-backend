@@ -51,6 +51,17 @@ export class ProjectsService {
     });
   }
 
+  findOneBySlug(slug: string) {
+    return this.prisma.project.findUnique({
+      where: { slug },
+      include: {
+        skills: {
+          include: { skill: true },
+        },
+      },
+    });
+  }
+
   async update(id: string, dto: UpdateProjectDto) {
     const { skillIds, ...projectData } = dto;
 

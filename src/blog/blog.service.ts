@@ -99,6 +99,23 @@ export class BlogService {
     return paginateResponse(items, total, safePage, safeLimit);
   }
 
+  async findById(id: string) {
+    const post = await this.prisma.blogPost.findUnique({
+      where: { id },
+      include: {
+        tags: {
+          include: { skill: true },
+        },
+      },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    return post;
+  }
+
   async create(dto: CreateBlogDto) {
     const baseSlug = generateSlug(dto.title);
     const slug = await this.ensureUniqueSlug(baseSlug);
