@@ -17,6 +17,42 @@ Backend API untuk aplikasi portfolio, dibangun dengan NestJS, Prisma, PostgreSQL
 - npm 10+
 - PostgreSQL aktif
 
+## Docker Untuk Apa?
+
+Docker di project ini dipakai untuk mempermudah setup environment backend agar konsisten di semua mesin (local/dev server/CI).
+
+- `docker-compose.yml`: menjalankan PostgreSQL lokal siap pakai tanpa install manual di host.
+- `Dockerfile`: membungkus aplikasi NestJS ke image container untuk run/build yang konsisten (mirip environment deploy).
+
+Manfaat utamanya:
+
+- Onboarding lebih cepat (tinggal jalankan container DB).
+- Mengurangi error beda environment antar perangkat.
+- Memudahkan testing flow deploy karena image app bisa dijalankan seperti production.
+
+### Quick Start Docker (Database)
+
+1. Pastikan Docker Desktop aktif.
+2. Jalankan PostgreSQL via Compose:
+
+```bash
+docker compose up -d postgres
+```
+
+3. Cek container aktif:
+
+```bash
+docker compose ps
+```
+
+4. Matikan saat selesai:
+
+```bash
+docker compose down
+```
+
+Catatan: service `postgres` memakai env `POSTGRES_USER`, `POSTGRES_PASSWORD`, dan `POSTGRES_DB` dari file `.env`.
+
 ## Menjalankan Secara Lokal
 
 1. Install dependency
